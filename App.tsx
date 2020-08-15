@@ -2,7 +2,6 @@ import React, { useState, useCallback, useEffect } from 'react'
 import { StyleSheet, View, Dimensions } from 'react-native'
 import { Button, Input } from 'react-native-elements'
 import ECanvas from './src/components/ECanvas'
-import { CanvasRenderingContext2D } from 'react-native-canvas'
 import { parseFont } from './src/utils/font'
 import okageo, { ISvgPath } from 'okageo'
 
@@ -46,7 +45,7 @@ export default function App() {
     [],
   )
   const draw = useCallback(
-    (ctx: CanvasRenderingContext2D) => {
+    (ctx: globalThis.CanvasRenderingContext2D) => {
       state.pathList.forEach((p) => okageo.svg.draw(ctx as any, p))
     },
     [state.pathList],

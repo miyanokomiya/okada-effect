@@ -1,22 +1,20 @@
 import React, { useRef, useEffect } from 'react'
 import { StyleSheet, View, Platform } from 'react-native'
-import Canvas, { CanvasRenderingContext2D } from 'react-native-canvas'
+import Canvas from 'react-native-canvas'
 
 type Props = {
   size: {
     width: number
     height: number
   }
-  draw?: (ctx: CanvasRenderingContext2D) => void
+  draw: (ctx: globalThis.CanvasRenderingContext2D) => void
 }
 
 const ECanvas: React.FC<Props> = (props) => {
-  const $canvas = useRef<HTMLCanvasElement>(null)
+  const $webCanvas = useRef<HTMLCanvasElement>(null)
+  const $nativeCanvas = useRef<Canvas>(null)
 
-  function handleCanvas(canvas: Canvas) {
-    if (!canvas) return
-    canvas.width = props.size.width
-    canvas.height = props.size.height
+  function handleCanvas(canvas: HTMLCanvasElement) {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     ctx.clearRect(0, 0, props.size.width, props.size.height)
@@ -24,15 +22,22 @@ const ECanvas: React.FC<Props> = (props) => {
   }
 
   useEffect(() => {
-    if (!$canvas.current) return
-    handleCanvas($canvas.current as any)
-  }, [props.size, props.draw, $canvas])
+    if (!$webCanvas.current) return
+    handleCanvas($webCanvas.current)
+  }, [props.size, props.draw, $webCanvas])
+
+  useEffect(() => {
+    if (!$nativeCanvas.current) return
+    $nativeCanvas.current.width = props.size.width
+    $nativeCanvas.current.height = props.size.height
+    handleCanvas($nativeCanvas.current as any)
+  }, [props.size, props.draw, $nativeCanvas])
 
   const gameCanvas =
     Platform.OS === 'web' ? (
-      <canvas {...props.size} ref={$canvas} />
+      <canvas {...props.size} ref={$webCanvas} />
     ) : (
-      <Canvas ref={$canvas} />
+      <Canvas ref={$nativeCanvas} />
     )
 
   return (
