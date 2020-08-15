@@ -29,7 +29,11 @@ const ECanvas: React.FC<Props> = (props) => {
   }, [props.size, props.draw, $canvas])
 
   const gameCanvas =
-    Platform.OS === 'web' ? <canvas {...props.size} ref={$canvas} /> : <Canvas ref={$canvas} />
+    Platform.OS === 'web' ? (
+      <canvas {...props.size} ref={$canvas} />
+    ) : (
+      <Canvas ref={$canvas} />
+    )
 
   return (
     <View style={styles.canvasWrapper}>

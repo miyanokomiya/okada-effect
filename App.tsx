@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react'
 import { StyleSheet, View, Dimensions } from 'react-native'
 import { Button, Input } from 'react-native-elements'
 import ECanvas from './src/components/ECanvas'
-import Canvas, { CanvasRenderingContext2D } from 'react-native-canvas'
+import { CanvasRenderingContext2D } from 'react-native-canvas'
 import { parseFont } from './src/utils/font'
 import okageo, { ISvgPath } from 'okageo'
 
@@ -35,10 +35,16 @@ export default function App() {
     height: Dimensions.get('window').height * 0.5,
   }
 
-  const [state, setState] = useState({ text: 'ABC', pathList: [] as ISvgPath[] })
+  const [state, setState] = useState({
+    text: 'ABC',
+    pathList: [] as ISvgPath[],
+  })
   const [draftForm, setDraftForm] = useState({ text: 'ABC' })
 
-  const onInputText = useCallback((text: string) => setDraftForm({ ...draftForm, text }), [])
+  const onInputText = useCallback(
+    (text: string) => setDraftForm({ ...draftForm, text }),
+    [],
+  )
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D) => {
       state.pathList.forEach((p) => okageo.svg.draw(ctx as any, p))
@@ -50,14 +56,21 @@ export default function App() {
   }, [state, draftForm])
 
   useEffect(() => {
-    importFromString(state.text, canvasSize).then((pathList) => setState({ ...state, pathList }))
+    importFromString(state.text, canvasSize).then((pathList) =>
+      setState({ ...state, pathList }),
+    )
   }, [state.text])
 
   return (
     <View style={styles.root}>
       <ECanvas size={canvasSize} draw={draw} />
       <View style={styles.container}>
-        <Input multiline label="text" value={draftForm.text} onChangeText={onInputText} />
+        <Input
+          multiline
+          label="text"
+          value={draftForm.text}
+          onChangeText={onInputText}
+        />
         <Button title="Reload" onPress={onClickReload} />
       </View>
     </View>
