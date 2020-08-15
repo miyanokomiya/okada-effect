@@ -1,38 +1,64 @@
-import { StatusBar } from 'expo-status-bar'
-import React, { useState, useCallback } from 'react'
-import { StyleSheet, Text, View, Dimensions } from 'react-native'
-import { Card, Button, Input } from 'react-native-elements'
+import React, { useState, useCallback, useEffect } from 'react'
+import { StyleSheet, View, Dimensions } from 'react-native'
+import { Button, Input } from 'react-native-elements'
 import ECanvas from './src/components/ECanvas'
-import type { CanvasRenderingContext2D } from 'react-native-canvas'
+import Canvas, { CanvasRenderingContext2D } from 'react-native-canvas'
+import { parseFont } from './src/utils/font'
+import okageo, { ISvgPath } from 'okageo'
+
+type Size = {
+  width: number
+  height: number
+}
+
+async function importFromString(text: string, size: Size): Promise<ISvgPath[]> {
+  const margin = 10
+  const pathInfoList = await parseFont(text, {
+    ...okageo.svg.createStyle(),
+    fill: true,
+    fillStyle: 'gray',
+    stroke: true,
+    strokeStyle: 'yellow',
+  })
+  return okageo.svg.fitRect(
+    pathInfoList,
+    margin,
+    margin,
+    size.width - margin * 2,
+    size.height - margin * 2,
+  )
+}
 
 export default function App() {
-  const canvasSize = {
+  const canvasSize: Size = {
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height * 0.5,
   }
 
-  const [state, setState] = useState({ text: 'ABC' })
+  const [state, setState] = useState({ text: 'ABC', pathList: [] as ISvgPath[] })
+  const [draftForm, setDraftForm] = useState({ text: 'ABC' })
 
-  const onInputText = useCallback((text: string) => setState({ text }), [])
+  const onInputText = useCallback((text: string) => setDraftForm({ ...draftForm, text }), [])
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D) => {
-      ctx.fillStyle = 'purple'
-      ctx.fillRect(30, 50, 100, 50)
-      ctx.strokeText(state.text, 20, 20)
+      state.pathList.forEach((p) => okageo.svg.draw(ctx as any, p))
     },
-    [state.text],
+    [state.pathList],
   )
+  const onClickReload = useCallback(() => {
+    setState({ ...state, ...draftForm })
+  }, [state, draftForm])
+
+  useEffect(() => {
+    importFromString(state.text, canvasSize).then((pathList) => setState({ ...state, pathList }))
+  }, [state.text])
 
   return (
     <View style={styles.root}>
       <ECanvas size={canvasSize} draw={draw} />
       <View style={styles.container}>
-        <Text>{state.text}</Text>
-        <StatusBar style="auto" />
-        <Card title="入力してね">
-          <Input label="text" value={state.text} onChangeText={onInputText} />
-          <Button title="Entry" buttonStyle={{ marginTop: 30, borderRadius: 20 }} />
-        </Card>
+        <Input multiline label="text" value={draftForm.text} onChangeText={onInputText} />
+        <Button title="Reload" onPress={onClickReload} />
       </View>
     </View>
   )

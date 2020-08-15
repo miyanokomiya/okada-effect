@@ -14,7 +14,10 @@ const ECanvas: React.FC<Props> = (props) => {
   const $canvas = useRef<HTMLCanvasElement>(null)
 
   function handleCanvas(canvas: Canvas) {
-    const ctx = canvas?.getContext('2d')
+    if (!canvas) return
+    canvas.width = props.size.width
+    canvas.height = props.size.height
+    const ctx = canvas.getContext('2d')
     if (!ctx) return
     ctx.clearRect(0, 0, props.size.width, props.size.height)
     props.draw(ctx)
@@ -23,14 +26,10 @@ const ECanvas: React.FC<Props> = (props) => {
   useEffect(() => {
     if (!$canvas.current) return
     handleCanvas($canvas.current as any)
-  }, [props.draw])
+  }, [props.size, props.draw, $canvas])
 
   const gameCanvas =
-    Platform.OS === 'web' ? (
-      <canvas {...props.size} ref={$canvas} />
-    ) : (
-      <Canvas {...props.size} ref={$canvas} />
-    )
+    Platform.OS === 'web' ? <canvas {...props.size} ref={$canvas} /> : <Canvas ref={$canvas} />
 
   return (
     <View style={styles.canvasWrapper}>
