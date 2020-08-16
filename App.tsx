@@ -4,7 +4,7 @@ import { Button, Input } from 'react-native-elements'
 import ECanvas from './src/components/ECanvas'
 import { parseFont } from './src/utils/font'
 import okageo, { ISvgPath } from 'okageo'
-import { GameApp, BodyShape } from './src/utils/physics'
+import { GameApp } from './src/utils/physics'
 
 type Size = {
   width: number
@@ -38,9 +38,9 @@ export default function App() {
   }
 
   const [state, setState] = useState({
-    text: 'ABC',
+    text: 'NOTE\nNOTE',
   })
-  const [draftForm, setDraftForm] = useState({ text: 'ABC' })
+  const [draftForm, setDraftForm] = useState({ text: state.text })
 
   const [gameApp] = useState<GameApp>(new GameApp(canvasSize))
   useEffect(() => {
