@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useMemo } from 'react'
 import { StyleSheet, View, Platform } from 'react-native'
 import Canvas from 'react-native-canvas'
 
@@ -33,12 +33,13 @@ const ECanvas: React.FC<Props> = (props) => {
     handleCanvas($nativeCanvas.current as any)
   }, [props.size, props.draw, $nativeCanvas])
 
-  const gameCanvas =
-    Platform.OS === 'web' ? (
+  const gameCanvas = useMemo(() => {
+    return Platform.OS === 'web' ? (
       <canvas {...props.size} ref={$webCanvas} />
     ) : (
       <Canvas ref={$nativeCanvas} />
     )
+  }, [props.size])
 
   return (
     <View style={styles.canvasWrapper}>
